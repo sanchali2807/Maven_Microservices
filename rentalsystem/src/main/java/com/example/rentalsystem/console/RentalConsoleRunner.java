@@ -2,6 +2,7 @@ package com.example.rentalsystem.console;
 
 import com.example.apiconnector.dto.VehicleDTO;
 import com.example.rentalsystem.entity.Rental;
+import com.example.apiconnector.enums.RentalStatus;
 import com.example.rentalsystem.service.RentalService;
 import com.example.rentalsystem.service.VehicleClientService;
 import org.springframework.boot.CommandLineRunner;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Scanner;
 
 @Component
 public class RentalConsoleRunner implements CommandLineRunner {
@@ -24,7 +24,7 @@ public class RentalConsoleRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Scanner scanner = new Scanner(System.in);
+        java.util.Scanner scanner = new java.util.Scanner(System.in);
 
         while (true) {
             System.out.println("\n=== Rental Management ===");
@@ -67,10 +67,23 @@ public class RentalConsoleRunner implements CommandLineRunner {
         }
     }
 
-    private void addRental(Scanner scanner) {
+    private void addRental(java.util.Scanner scanner) {
         try {
+            // Show all available vehicles
+            List<VehicleDTO> vehicles = vehicleService.getAllVehicles();
+            if (vehicles.isEmpty()) {
+                System.out.println("No vehicles available.");
+                return;
+            }
+            System.out.println("Available Vehicles:");
+            vehicles.forEach(v -> System.out.println(v.getId() + " - " + v.getModel() + " ($" + v.getPricePerDay() + " per day)"));
+
             System.out.print("Enter customer name: ");
             String customer = scanner.nextLine();
+            if (!customer.matches("[a-zA-Z ]+")) {
+    System.out.println("Error: Customer name must contain letters only.");
+    return;
+}
 
             System.out.print("Enter vehicle ID: ");
             Long vehicleId = Long.parseLong(scanner.nextLine());
@@ -83,9 +96,17 @@ public class RentalConsoleRunner implements CommandLineRunner {
 
             System.out.print("Enter start date (yyyy-mm-dd): ");
             LocalDate startDate = LocalDate.parse(scanner.nextLine());
+            if (startDate.isBefore(LocalDate.now())) {
+                System.out.println("Error: Start date cannot be in the past.");
+                return;
+            }
 
             System.out.print("Enter end date (yyyy-mm-dd): ");
             LocalDate endDate = LocalDate.parse(scanner.nextLine());
+            if (endDate.isBefore(startDate)) {
+                System.out.println("Error: End date cannot be before start date.");
+                return;
+            }
 
             Rental rental = rentalService.createRental(customer, vehicle, startDate, endDate);
             System.out.println("Rental added successfully! ID: " + rental.getId());
@@ -106,18 +127,50 @@ public class RentalConsoleRunner implements CommandLineRunner {
         }
     }
 
-    private void deleteRental(Scanner scanner) {
+    private void deleteRental(java.util.Scanner scanner) {
         System.out.print("Enter rental ID to delete: ");
         try {
             Long rentalId = Long.parseLong(scanner.nextLine());
+
+            if (rentalId <= 0) {
+                System.out.println("Error: Rental ID must be positive.");
+                return;
+            }
+
+            boolean exists = rentalService.getAllRentals().stream()
+                    .anyMatch(r -> r.getId().equals(rentalId));
+
+            if (!exists) {
+                System.out.println("Error: Rental with ID " + rentalId + " does not exist.");
+                return;
+            }
+
             rentalService.deleteRental(rentalId);
             System.out.println("Rental deleted successfully!");
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid rental ID. Please enter a valid number.");
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    private void cancelRental(Scanner scanner) {
+    private void cancelRental(java.util.Scanner scanner) {
+        // Show only booked rentals
+        List<Rental> bookedRentals = rentalService.getAllRentals().stream()
+                .filter(r -> r.getStatus() == RentalStatus.BOOKED)
+                .toList();
+
+        if (bookedRentals.isEmpty()) {
+            System.out.println("No booked rentals available to cancel.");
+            return;
+        }
+
+        System.out.println("Booked Rentals:");
+        bookedRentals.forEach(r -> System.out.println(r.getId() + " - " +
+                r.getCustomerName() + " rented " + r.getVehicleModel() +
+                " from " + r.getStartDate() + " to " + r.getEndDate() +
+                " ($" + r.getPrice() + ")"));
+
         System.out.print("Enter rental ID to cancel: ");
         try {
             Long rentalId = Long.parseLong(scanner.nextLine());
