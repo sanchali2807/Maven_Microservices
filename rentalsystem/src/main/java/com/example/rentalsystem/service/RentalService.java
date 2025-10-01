@@ -1,8 +1,8 @@
-
 package com.example.rentalsystem.service;
 
 import com.example.apiconnector.dto.VehicleDTO;
 import com.example.rentalsystem.entity.Rental;
+import com.example.apiconnector.enums.RentalStatus;
 import com.example.rentalsystem.repository.RentalRepository;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +18,50 @@ public class RentalService {
         this.repository = repository;
     }
 
+    public Rental addRental(Rental rental) {
+        rental.setStatus(RentalStatus.BOOKED); // Newly added rentals are BOOKED
+        return repository.save(rental);
+    }
+
+    public List<Rental> getAllRentals() {
+        List<Rental> rentals = repository.findAll();
+
+        // Automatically mark rentals as COMPLETED if end date has passed
+        rentals.forEach(r -> {
+            if (r.getStatus() == RentalStatus.BOOKED && r.getEndDate().isBefore(LocalDate.now())) {
+                r.setStatus(RentalStatus.COMPLETED);
+                repository.save(r);
+            }
+        });
+
+        return rentals;
+    }
+
+    public void deleteRental(Long id) {
+        repository.deleteById(id);
+    }
+
+    public Rental cancelRental(Long id) {
+        Rental rental = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rental not found"));
+
+        if (rental.getStatus() != RentalStatus.BOOKED) {
+            throw new RuntimeException("Only booked rentals can be cancelled");
+        }
+
+        rental.setStatus(RentalStatus.CANCELLED);
+        return repository.save(rental);
+    }
+
     public Rental createRental(String customerName, VehicleDTO vehicle, LocalDate startDate, LocalDate endDate) {
-        if (isVehicleRented(vehicle.getId(), startDate, endDate)) {
-            throw new IllegalStateException("Vehicle is already rented in that period.");
+        // Check overlapping bookings
+        boolean overlapping = repository.findAll().stream()
+                .anyMatch(r -> r.getVehicleId().equals(vehicle.getId()) &&
+                        r.getStatus() == RentalStatus.BOOKED &&
+                        !(endDate.isBefore(r.getStartDate()) || startDate.isAfter(r.getEndDate())));
+
+        if (overlapping) {
+            throw new RuntimeException("Vehicle is already booked in that period");
         }
 
         Rental rental = new Rental();
@@ -30,24 +71,8 @@ public class RentalService {
         rental.setStartDate(startDate);
         rental.setEndDate(endDate);
         rental.setPrice(vehicle.getPricePerDay() * (endDate.toEpochDay() - startDate.toEpochDay()));
+        rental.setStatus(RentalStatus.BOOKED);
 
         return repository.save(rental);
     }
-
-    private boolean isVehicleRented(Long vehicleId, LocalDate start, LocalDate end) {
-        return repository.findAll().stream()
-                .anyMatch(r -> r.getVehicleId().equals(vehicleId) &&
-                        !(end.isBefore(r.getStartDate()) || start.isAfter(r.getEndDate())));
-    }
-
-    public List<Rental> getAllRentals() {
-        return repository.findAll();
-    }
-
-    public void deleteRental(Long id) {
-        repository.deleteById(id);
-    }
 }
-
-
-
