@@ -25,7 +25,7 @@ public class VehicleController {
                 .collect(Collectors.toList());
     }
 
-    // Get vehicle by ID (with 404 handling)
+
     @GetMapping("/{id}")
     public ResponseEntity<VehicleDTO> getVehicle(@PathVariable("id") Long id) {
         return service.getVehicleByIdOptional(id)
@@ -33,10 +33,10 @@ public class VehicleController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Add a new vehicle
+
     @PostMapping
     public ResponseEntity<VehicleDTO> addVehicle(@Valid @RequestBody Vehicle vehicle) {
-        // Prevent adding duplicate vehicle names
+      
         if (service.vehicleExists(vehicle.getName())) {
             return ResponseEntity.badRequest()
                     .body(new VehicleDTO(null, "Vehicle with this name already exists", vehicle.getPricePerDay()));
@@ -47,7 +47,7 @@ public class VehicleController {
         return ResponseEntity.ok(dto);
     }
 
-    // Delete vehicle by ID
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable("id") Long id) {
         boolean deleted = service.deleteVehicle(id);
