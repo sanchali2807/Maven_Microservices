@@ -2,7 +2,6 @@ package com.example.rentalsystem.console;
 
 import com.example.apiconnector.dto.VehicleDTO;
 import com.example.rentalsystem.entity.Rental;
-// import com.example.apiconnector.enums.RentalStatus;
 import com.example.rentalsystem.service.RentalService;
 import com.example.rentalsystem.service.VehicleClientService;
 import org.springframework.boot.CommandLineRunner;
