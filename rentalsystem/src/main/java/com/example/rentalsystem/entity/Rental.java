@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
+import com.example.apiconnector.enums.RentalStatus;
+
 @Entity
 @Table(name = "Rental")
 public class Rental {
@@ -16,7 +18,6 @@ public class Rental {
     @NotBlank(message = "Customer name cannot be blank")
     private String customerName;
 
-    // Link to vehicle by ID
     @Positive(message = "Vehicle ID must be positive")
     private Long vehicleId;
 
@@ -29,7 +30,9 @@ public class Rental {
     @Positive(message = "Price must be positive")
     private double price;
 
-    // getters and setters
+    @Enumerated(EnumType.STRING)
+    private RentalStatus status;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -50,4 +53,7 @@ public class Rental {
 
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+
+      public RentalStatus getStatus() { return status; }
+    public void setStatus(RentalStatus status) { this.status = status; }
 }

@@ -1,3 +1,4 @@
+
 package com.example.rentalsystem.controller;
 
 import com.example.apiconnector.dto.VehicleDTO;
@@ -27,12 +28,21 @@ public class RentalController {
     }
 
     @PostMapping
-    public Rental addRental(@Valid @RequestBody Rental rental) {
-        // Check if vehicle exists
-        VehicleDTO vehicle = vehicleClientService.getVehicleById(rental.getVehicleId());
+    public Rental addRental(@Valid @RequestBody Rental rentalRequest) {
+        VehicleDTO vehicle = vehicleClientService.getVehicleById(rentalRequest.getVehicleId());
         if (vehicle == null) {
-            throw new RuntimeException("Vehicle not found for rental");
+            throw new RuntimeException("Vehicle not found");
         }
-        return rentalService.addRental(rental);
+        return rentalService.createRental(
+                rentalRequest.getCustomerName(),
+                vehicle,
+                rentalRequest.getStartDate(),
+                rentalRequest.getEndDate()
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteRental(@PathVariable Long id) {
+        rentalService.deleteRental(id);
     }
 }

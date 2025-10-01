@@ -1,12 +1,10 @@
 package com.example.vehiclesystem.controller;
-
 import com.example.apiconnector.dto.VehicleDTO;
 import com.example.vehiclesystem.entity.Vehicle;
 import com.example.vehiclesystem.service.VehicleService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +18,6 @@ public class VehicleController {
         this.service = service;
     }
 
-    // Get all vehicles
     @GetMapping
     public List<VehicleDTO> getAllVehicles() {
         return service.getAllVehicles().stream()

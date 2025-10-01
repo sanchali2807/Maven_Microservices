@@ -1,3 +1,4 @@
+
 package com.example.rentalsystem.console;
 
 import com.example.apiconnector.dto.VehicleDTO;
@@ -37,7 +38,7 @@ public class RentalConsoleRunner implements CommandLineRunner {
             scanner.nextLine(); // consume newline
 
             switch (choice) {
-                case 1:
+                case 1: {
                     try {
                         System.out.print("Enter customer name: ");
                         String customer = scanner.nextLine();
@@ -57,31 +58,14 @@ public class RentalConsoleRunner implements CommandLineRunner {
                         System.out.print("Enter end date (yyyy-mm-dd): ");
                         LocalDate endDate = LocalDate.parse(scanner.nextLine());
 
-                        // Check overlapping rentals
-                        boolean overlapping = rentalService.getAllRentals().stream()
-                                .anyMatch(r -> r.getVehicleId().equals(vehicleId) &&
-                                        !(endDate.isBefore(r.getStartDate()) || startDate.isAfter(r.getEndDate())));
-                        if (overlapping) {
-                            System.out.println("Error: Vehicle is already rented in that period.");
-                            break;
-                        }
-
-                        Rental rental = new Rental();
-                        rental.setCustomerName(customer);
-                        rental.setVehicleId(vehicle.getId());
-                        rental.setVehicleModel(vehicle.getModel());
-                        rental.setStartDate(startDate);
-                        rental.setEndDate(endDate);
-                        rental.setPrice(vehicle.getPricePerDay() * (endDate.toEpochDay() - startDate.toEpochDay()));
-
-                        rentalService.addRental(rental);
-                        System.out.println("Rental added successfully!");
+                        Rental rental = rentalService.createRental(customer, vehicle, startDate, endDate);
+                        System.out.println("Rental added successfully! ID: " + rental.getId());
                     } catch (Exception e) {
                         System.out.println("Error: " + e.getMessage());
                     }
                     break;
-
-                case 2:
+                }
+                case 2: {
                     List<Rental> rentals = rentalService.getAllRentals();
                     if (rentals.isEmpty()) {
                         System.out.println("No rentals found.");
@@ -92,27 +76,19 @@ public class RentalConsoleRunner implements CommandLineRunner {
                                 " ($" + r.getPrice() + ")"));
                     }
                     break;
-
-                case 3:
+                }
+                case 3: {
                     System.out.print("Enter rental ID to delete: ");
                     Long rentalId = Long.parseLong(scanner.nextLine());
-                    rentalService.getAllRentals().stream()
-                            .filter(r -> r.getId().equals(rentalId))
-                            .findFirst()
-                            .ifPresentOrElse(
-                                    r -> {
-                                        rentalService.deleteRental(rentalId);
-                                        System.out.println("Rental deleted successfully!");
-                                    },
-                                    () -> System.out.println("Rental not found!")
-                            );
+                    rentalService.deleteRental(rentalId);
+                    System.out.println("Rental deleted successfully!");
                     break;
-
-                case 4:
+                }
+                case 4: {
                     System.out.println("Exiting...");
                     return;
-
-                default:
+                }
+                default: 
                     System.out.println("Invalid option, try again.");
             }
         }

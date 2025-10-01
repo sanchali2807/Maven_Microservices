@@ -21,7 +21,6 @@ public class Vehicle {
     @Positive(message = "Price per day must be positive")
     private double pricePerDay;
 
-    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
