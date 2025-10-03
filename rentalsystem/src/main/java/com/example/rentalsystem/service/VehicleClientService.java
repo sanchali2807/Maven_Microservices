@@ -13,12 +13,12 @@ public class VehicleClientService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String vehicleServiceUrl = "http://localhost:8081/vehicles";
 
-    // Get vehicle by ID
+  
     public VehicleDTO getVehicleById(Long id) {
         return restTemplate.getForObject(vehicleServiceUrl + "/" + id, VehicleDTO.class);
     }
 
-    // Get all vehicles
+    
     public List<VehicleDTO> getAllVehicles() {
         VehicleDTO[] vehicles = restTemplate.getForObject(vehicleServiceUrl, VehicleDTO[].class);
         if (vehicles != null) {

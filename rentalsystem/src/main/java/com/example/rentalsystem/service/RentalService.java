@@ -19,14 +19,14 @@ public class RentalService {
     }
 
     public Rental addRental(Rental rental) {
-        rental.setStatus(RentalStatus.BOOKED); // Newly added rentals are BOOKED
+        rental.setStatus(RentalStatus.BOOKED); 
         return repository.save(rental);
     }
 
     public List<Rental> getAllRentals() {
         List<Rental> rentals = repository.findAll();
 
-        // Automatically mark rentals as COMPLETED if end date has passed
+       
         rentals.forEach(r -> {
             if (r.getStatus() == RentalStatus.BOOKED && r.getEndDate().isBefore(LocalDate.now())) {
                 r.setStatus(RentalStatus.COMPLETED);
@@ -54,7 +54,7 @@ public class RentalService {
     }
 
     public Rental createRental(String customerName, VehicleDTO vehicle, LocalDate startDate, LocalDate endDate) {
-        // Check overlapping bookings
+       
         boolean overlapping = repository.findAll().stream()
                 .anyMatch(r -> r.getVehicleId().equals(vehicle.getId()) &&
                         r.getStatus() == RentalStatus.BOOKED &&

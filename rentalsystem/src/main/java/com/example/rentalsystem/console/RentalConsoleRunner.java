@@ -69,7 +69,6 @@ public class RentalConsoleRunner implements CommandLineRunner {
 
     private void addRental(java.util.Scanner scanner) {
         try {
-            // Show all available vehicles
             List<VehicleDTO> vehicles = vehicleService.getAllVehicles();
             if (vehicles.isEmpty()) {
                 System.out.println("No vehicles available.");
@@ -155,7 +154,7 @@ public class RentalConsoleRunner implements CommandLineRunner {
     }
 
     private void cancelRental(java.util.Scanner scanner) {
-        // Show only booked rentals
+    
         List<Rental> bookedRentals = rentalService.getAllRentals().stream()
                 .filter(r -> r.getStatus() == RentalStatus.BOOKED)
                 .toList();
