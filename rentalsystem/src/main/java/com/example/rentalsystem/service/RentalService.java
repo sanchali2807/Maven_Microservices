@@ -70,7 +70,7 @@ public class RentalService {
         rental.setVehicleModel(vehicle.getModel());
         rental.setStartDate(startDate);
         rental.setEndDate(endDate);
-        rental.setPrice(vehicle.getPricePerDay() * (endDate.toEpochDay() - startDate.toEpochDay()));
+        rental.setPrice(vehicle.getPricePerDay() * (endDate.toEpochDay() - startDate.toEpochDay()+1));
         rental.setStatus(RentalStatus.BOOKED);
 
         return repository.save(rental);
